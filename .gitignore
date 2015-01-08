@@ -35,12 +35,14 @@
 *.inp
 
 # Files
-
+FLUENT/*
+Results_Fractional Step/*
 
 # input and output
 *.in
 *.op
 *.nml
 *.fig
+*.xlsx
 
 
