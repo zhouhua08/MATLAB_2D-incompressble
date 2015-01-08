@@ -22,11 +22,15 @@ clear all;
 mu=0.01; % dynamic viscosity /(kg/(m*s))
 Re=10;
 dt = 1e-3; % time step
-tf = 2e-0; % final time
-lx = 1; % width of box
-ly = 0.1; % height of box
-nx = 100; % number of x-gridpoints
-ny = 10; % number of y-gridpoints
+tf = 4e-1; % final time
+% lx = 1; % width of box
+% ly = 0.1; % height of box
+% nx = 100; % number of x-gridpoints
+% ny = 10; % number of y-gridpoints
+lx = 3; % width of box
+ly = 3; % height of box
+nx = 3; % number of x-gridpoints
+ny = 3; % number of y-gridpoints
 nsteps = 10; % number of steps with graphic output
 %-----------------------------------------------------------------------
 nt = ceil(tf/dt); dt = tf/nt;
@@ -57,7 +61,6 @@ rho_u=300./T;
 rho_tmp=repmat(rho_u,nx-1,1);
 rho_tmp=reshape(rho_tmp,[],1);
 rho_tmp=diag(rho_tmp);
-
 Lu = rho_tmp+dt*mu*(kron(speye(ny),K1(nx-1,hx,2,1))+...
 kron(K1(ny,hy,3,3),speye(nx-1)));
 peru = symamd(Lu); Ru = chol(Lu(peru,peru)); Rut = Ru';
@@ -68,12 +71,12 @@ rho_v=300./T;
 rho_tmp=repmat(rho_v(2:end-1),nx,1);
 rho_tmp=reshape(rho_tmp,[],1);
 rho_tmp=diag(rho_tmp);
-
 Lv = rho_tmp+dt*mu*(kron(speye(ny-1),K1(nx,hx,3,3))+...
 kron(K1(ny-1,hy,2,2),speye(nx)));
 perv = symamd(Lv); Rv = chol(Lv(perv,perv)); Rvt = Rv';
-%Lq = kron(speye(ny-1),K1(nx-1,hx,2))+kron(K1(ny-1,hy,2),speye(nx-1));
-%perq = symamd(Lq); Rq = chol(Lq(perq,perq)); Rqt = Rq';
+
+% Lq = kron(speye(ny-1),K1(nx-1,hx,2))+kron(K1(ny-1,hy,2),speye(nx-1));
+% perq = symamd(Lq); Rq = chol(Lq(perq,perq)); Rqt = Rq';
 
 fprintf(', time loop\n--20%%--40%%--60%%--80%%-100%%\n')
 for k = 1:nt
@@ -139,7 +142,7 @@ Len = sqrt(Ue.^2+Ve.^2+eps);
 quiver(x,y,(Ue./Len)',(Ve./Len)',.4,'k-')
 hold off, axis equal, axis([0 lx 0 ly])
 caxis([0 12]);
-title(sprintf('Contour of static pressure /(bar) for Re = %0.1g at t = %0.2g',Re,k*dt));
+title(sprintf('Contour of static pressure /(Pa) for Re = %0.1g at t = %0.2g',Re,k*dt),'FontSize',12);
 drawnow
 filename=sprintf('Contour of static pressure at t = %0.2g.fig', k*dt);
 savefig(filename);
@@ -149,9 +152,10 @@ y_tmp=linspace(hy/2,ly-hy/2,ny);
 y_tmp=[0, y_tmp, ly];
 U_tmp=[0, U(end, :),0];
 plot(U_tmp, y_tmp,'--ko','LineWidth',2,'MarkerSize',10,'MarkerFaceColor','r');
-title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at t = %0.2g',Re,k*dt));
-xlabel('Horizontal velocity /(m/s)');
-ylabel('Vertical position /(m)');
+set(gca, 'FontSize',12);
+title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at t = %0.2g',Re,k*dt),'FontSize',12);
+xlabel('Horizontal velocity /(m/s)','FontSize',14);
+ylabel('Vertical position /(m)','FontSize',14);
 drawnow
 filename=sprintf('Velocity profile at pipe end at t = %0.2g.fig', k*dt);
 savefig(filename);
@@ -169,7 +173,8 @@ contourf(x_tmp,y_tmp,rho_tmp',10,'w-'), hold on
 colorbar('location','southoutside');
 axis equal, axis([0 lx 0 ly]);
 caxis([0.85 1]);
-title('Density distribution /(kg/m^3)');
+set(gca, 'FontSize',12);
+title('Density distribution /(kg/m^3)','FontSize',14);
 
 % plot outlet horizontal velocity given by this code and FLUENT calculation
 figure(4)
@@ -183,9 +188,10 @@ U_FLUENT=[0.00E+00,5.30E-01,9.42E-01,1.24E+00,1.41E+00,1.47E+00,1.41E+00,1.24E+0
 % plot(U_tmp, y_tmp,'--ko','LineWidth',2,'MarkerSize',10,'MarkerFaceColor','r'); hold on;
 plot(U_tmp, y_tmp,'--ko','LineWidth',2,'MarkerSize',10); hold on;
 plot(U_FLUENT, y_FLUENT,'--rx','LineWidth',2,'MarkerSize',10); hold off;
-title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at steady state',Re));
-xlabel('Horizontal velocity /(m/s)');
-ylabel('Vertical position /(m)');
 legend('This code','FLUENT')
+set(gca, 'FontSize',12);
+title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at steady state',Re),'FontSize',12);
+xlabel('Horizontal velocity /(m/s)','FontSize',16);
+ylabel('Vertical position /(m)','FontSize',16);
 
 
