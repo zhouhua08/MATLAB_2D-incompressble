@@ -14,12 +14,12 @@
 clear all;
 mu=0.01; % dynamic viscosity /(kg/(m*s))
 Re=10;
-dt = 1e-3; % time step
+dt = 5e-4; % time step
 tf = 4e-1; % final time
 lx = 1; % width of box
 ly = 0.1; % height of box
-nx = 50; % number of x-gridpoints
-ny = 5; % number of y-gridpoints
+nx = 200; % number of x-gridpoints
+ny = 20; % number of y-gridpoints
 nsteps = 10; % number of steps with graphic output
 %-----------------------------------------------------------------------
 nt = ceil(tf/dt); dt = tf/nt;
@@ -27,10 +27,11 @@ x = linspace(0,lx,nx+1); hx = lx/nx;
 y = linspace(0,ly,ny+1); hy = ly/ny;
 % [X,Y] = meshgrid(y,x);
 %-----------------------------------------------------------------------
+tic;
 fprintf('start initialization\n');
 % initial conditions
 U = zeros(nx-1,ny); V = zeros(nx,ny-1);
-P=zeros(nx,ny);
+P=zeros(nx,ny); pc=zeros(nx*ny,1);
 % boundary conditions
 uN = x*0; vN = avg(x)*0;
 uS = x*0; vS = avg(x)*0;
@@ -44,7 +45,7 @@ Vbc = [vS' zeros(nx,ny-3) vN']/hx^2+...
 
 fprintf('Initialization complete, start prepocessing\n');
 Lp = kron(eye(ny),Second_full(nx,hx,1,3))+kron(Second_full(ny,hy,1,1),eye (nx));
-% perp = symamd(Lp); Rp = chol(Lp(perp,perp)); Rpt = Rp';
+perp = symamd(Lp); mRp = chol(-1*Lp(perp,perp)); mRpt = mRp';
 
 Lu = kron(eye(ny),Second_full(nx-1,hx,2,1))+...
 kron(Second_full(ny,hy,3,3),eye(nx-1));
@@ -69,12 +70,12 @@ Va = avg(Ve(2:end-1,:)')'; Vd = diff(Ve(2:end-1,:)')'/2;
 U2x = diff(Ua.^2-gamma*abs(Ua).*Ud)/hx;
 V2y = diff((Va.^2-gamma*abs(Va).*Vd)')'/hy;
 
-% T=300+500*linspace(0.5*hy,ly-0.5*hy,ny);
-T=300*ones(1,ny); % constant density 
+T=300+500*linspace(0.5*hy,ly-0.5*hy,ny);
+% T=300*ones(1,ny); % constant density 
 rho_u=300./T;
 
-% T=300+500*linspace(0,ly,ny+1);
-T=300*ones(1,ny+1); % constant density 
+T=300+500*linspace(0,ly,ny+1);
+% T=300*ones(1,ny+1); % constant density 
 rho_v=300./T;
 
 Px=reshape(kron(eye(ny),First_back(nx,hx))*reshape(P,[],1),nx-1,ny);
@@ -99,8 +100,10 @@ rho_tmp=repmat(rho_v,nx,1);
 RhoVey=diff((rho_tmp.*Ve)')'/hy;
 
 rhs=reshape(RhoUex+RhoVey,[],1)/dt;
-pc=Lp\rhs;
+% pc=Lp\rhs;
 % pc=inv(Lp)*rhs;
+pc(perp)=-1*mRp\(mRpt\rhs(perp));
+
 Pc=reshape(pc,nx,ny);
 
 Pcx=reshape(kron(eye(ny),First_back(nx,hx))*pc,nx-1,ny);
@@ -138,9 +141,9 @@ Len = sqrt(Ue.^2+Ve.^2+eps);
 quiver(x,y,(Ue./Len)',(Ve./Len)',.4,'k-')
 hold off, axis equal, axis([0 lx 0 ly])
 caxis([0 12]);
-title(sprintf('Contour of static pressure /(Pa) for Re = %0.1g at %0.2g iteration',Re,k),'FontSize',12);
+title(sprintf('Contour of static pressure /(Pa) for Re = %0.1g at t = %0.2g',Re,k*dt),'FontSize',12);
 drawnow
-filename=sprintf('Contour of static pressure at %0.2g iteration.fig', k);
+filename=sprintf('Contour of static pressure at t = %0.2g.fig', k*dt);
 savefig(filename);
 
 figure(2)
@@ -149,14 +152,15 @@ y_tmp=[0, y_tmp, ly];
 U_tmp=[0, U(end, :),0];
 plot(U_tmp, y_tmp,'--ko','LineWidth',2,'MarkerSize',10,'MarkerFaceColor','r');
 set(gca, 'FontSize',12);
-title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at %0.2g iteration',Re,k),'FontSize',12);
+title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at t = %0.2g',Re,k*dt),'FontSize',12);
 xlabel('Horizontal velocity /(m/s)','FontSize',14);
 ylabel('Vertical position /(m)','FontSize',14);
 drawnow
-filename=sprintf('Velocity profile at pipe end at %0.2g iteration.fig', k);
+filename=sprintf('Velocity profile at pipe end at t = %0.2g.fig', k*dt);
 savefig(filename);
 end
 end
+toc;
 fprintf('\n')
 
 %%%% Plot figures invariant with time
@@ -189,5 +193,3 @@ set(gca, 'FontSize',12);
 title(sprintf('Velocity profile at pipe end /(m/s) for Re = %0.1g at steady state',Re),'FontSize',12);
 xlabel('Horizontal velocity /(m/s)','FontSize',16);
 ylabel('Vertical position /(m)','FontSize',16);
-
-
