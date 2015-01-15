@@ -22,15 +22,15 @@ clear all;
 mu=0.01; % dynamic viscosity /(kg/(m*s))
 Re=10;
 dt = 1e-3; % time step
-tf = 4e-1; % final time
-% lx = 1; % width of box
-% ly = 0.1; % height of box
-% nx = 100; % number of x-gridpoints
-% ny = 10; % number of y-gridpoints
-lx = 3; % width of box
-ly = 3; % height of box
-nx = 3; % number of x-gridpoints
-ny = 3; % number of y-gridpoints
+tf = 2e-1; % final time
+lx = 1; % width of box
+ly = 0.1; % height of box
+nx = 100; % number of x-gridpoints
+ny = 10; % number of y-gridpoints
+% lx = 3; % width of box
+% ly = 3; % height of box
+% nx = 3; % number of x-gridpoints
+% ny = 3; % number of y-gridpoints
 nsteps = 10; % number of steps with graphic output
 %-----------------------------------------------------------------------
 nt = ceil(tf/dt); dt = tf/nt;
